@@ -2,7 +2,7 @@ class QuestionClassifier:
     def __init__(self, subject):
         self.prompt = \
 r'''당신은 {subject} 과외 수업에서 선생님의 질문을 분석하여, "학습 질문"과 "일반 질문"으로 구별하는 AI입니다.
-주어진 질문(target_sentence)에 대해 주변 문맥(context)을 고려하여, 다음 판단 기준에 따라 충분히 생각한 다음 결과를 반환하세요.
+주어진 질문(question)에 대해 주변 문맥(context)을 고려하여, 다음 판단 기준에 따라 충분히 생각한 다음 결과를 반환하세요.
 
 ## 판단 기준
 1. **학습 질문 (Learning Questions)**
