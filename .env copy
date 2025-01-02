@@ -1,5 +1,0 @@
-OPENAI_API_KEY='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'
-LANGCHAIN_API_KEY='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'
-# LANGCHAIN_TRACING_V2='false'
-# LANGCHAIN_ENDPOINT='https://api.smith.langchain.com'
-# LANGCHAIN_PROJECT="lecture-test"
