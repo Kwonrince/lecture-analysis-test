@@ -78,7 +78,6 @@ def split_sentences(data):
         text = ' '.join([item['text'] for item in data])
         for sentence in kss.split_sentences(text, backend='fast'):
             for sent in kss.split_sentences(sentence, backend='mecab'):
-                if len(sent) > 5:
                     splited_data.append({'idx': idx, 'text': sent})
                     idx += 1
         
