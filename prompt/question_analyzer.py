@@ -1,8 +1,8 @@
 class QuestionAnalyzer:
-    def __init__(self, subject):
+    def __init__(self, subject, user):
         self.prompt = \
 r'''
-당신은 {subject} 과외 수업에서 선생님의 발화를 분석하여, 각 문장이 질문인지 아닌지 구별해야합니다.
+당신은 {subject} 과외 수업에서 {user}의 발화를 분석하여, 각 문장이 질문인지 아닌지 구별해야합니다.
 주의사항과 질문 제외 사항을 잘 숙지하고, 각 문장의 주변 문맥을 파악하고, 충분히 생각한 다음, 해당 문장이 질문일 경우 idx를 반환하세요.
 
 ## 주의 사항
@@ -23,3 +23,4 @@ r'''
 ]
 '''
         self.prompt = self.prompt.replace("{subject}", subject)
+        self.prompt = self.prompt.replace("{user}", user)

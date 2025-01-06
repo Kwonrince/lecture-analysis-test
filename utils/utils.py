@@ -119,7 +119,7 @@ def split_with_overlap(data, chunk_size, overlap):
     result = []
     step = chunk_size - overlap
     for i in range(0, len(data), step):
-        result.append(data[i:i + chunk_size])
+        result.append(data[i:i + chunk_size].to_dict(orient='records'))
         if i + chunk_size >= len(data):
             break
     return result
@@ -145,3 +145,21 @@ def get_question_context(data, target_indices, range_size=5):
         return grouped_result
     except:
         print(idx)
+
+def get_question_context_v2(data, target_indices, range_size=5):
+    grouped_result = []
+    for idx in target_indices:
+        question = data[idx]['teacher_text']
+        start_idx = max(0, idx - range_size)
+        end_idx = min(len(data), idx + range_size + 1)
+        contexts = data[start_idx:end_idx]
+        
+        context = []
+        for item in contexts:
+            if item['teacher_idx'] != None:
+                context.append({'time': item['time'], 'teacher_text': item['teacher_text']})
+            else:
+                context.append({'time': item['time'], 'student_text': item['student_text']})
+        
+        grouped_result.append({'idx': idx, 'question': question, 'context': context})
+    return grouped_result
