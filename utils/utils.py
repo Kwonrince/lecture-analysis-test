@@ -136,7 +136,7 @@ def mapping_time(extracted_data, splited_data):
                 temp.append(TimeConverter.convert_timerange_to_milliseconds(time))
             a_min = min([range_pair[0] for range_pair in temp])
             b_max = max([range_pair[1] for range_pair in temp])
-            time = "{} ~ {}".format(a_min,b_max)
+            time = TimeConverter.format_ms_to_xm_ys_range([a_min, b_max])
         else:
             time = time_list[0]
         item['time'] = time
@@ -174,28 +174,6 @@ def get_question_context(data, target_indices, range_size=5):
         return grouped_result
     except:
         print(idx)
-
-def get_question_context_v2(data, target_indices, speaker, range_size):
-    target_indices = df[df['teacher_idx'].isin(question_indices)].index.tolist()
-    grouped_result = []
-    for idx in target_indices:
-        if speaker == 'teacher':
-            question = data[idx]['teacher_text']
-        if speaker == 'student':
-            question = data[idx]['student_text']
-        start_idx = max(0, idx - range_size)
-        end_idx = min(len(data), idx + range_size + 1)
-        contexts = data[start_idx:end_idx]
-        
-        context = []
-        for item in contexts:
-            if item['teacher_idx'] != None:
-                context.append({'time': item['time'], 'teacher_text': item['teacher_text']})
-            else:
-                context.append({'time': item['time'], 'student_text': item['student_text']})
-        
-        grouped_result.append({'idx': idx, 'question': question, 'context': context})
-    return grouped_result
 
 def get_question_context_v2(df, question_indices, speaker, range_size):
     
