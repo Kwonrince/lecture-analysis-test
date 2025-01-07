@@ -65,12 +65,12 @@ def merge_files(directory):
 
 def extract_speaker(data, speaker=None):
     if speaker == None:
-        return [{'time_range': item['time_range'], 'speaker': item['speaker'], 'text': item['text']} for item in data]
+        return [{'time_range': item['time_range'], 'absolute_start_time': item['absolute_start_time'], 'absolute_end_time': item['absolute_end_time'], 'speaker': item['speaker'], 'text': item['text']} for item in data]
     if speaker == 'teacher':
-        return [{'time_range': item['time_range'], 'speaker': item['speaker'], 'text': item['text']} for item in data if item['speaker'] == 'teacher']
+        return [{'time_range': item['time_range'], 'absolute_start_time': item['absolute_start_time'], 'absolute_end_time': item['absolute_end_time'], 'speaker': item['speaker'], 'text': item['text']} for item in data if item['speaker'] == 'teacher']
     if speaker == 'student':
-        return [{'time_range': item['time_range'], 'speaker': item['speaker'], 'text': item['text']} for item in data if item['speaker'] == 'student']
-    
+        return [{'time_range': item['time_range'], 'absolute_start_time': item['absolute_start_time'], 'absolute_end_time': item['absolute_end_time'], 'speaker': item['speaker'], 'text': item['text']} for item in data if item['speaker'] == 'student']
+
 def split_sentences(data):
     splited_data = []
     idx = 0
@@ -90,29 +90,58 @@ def split_sentences(data):
     
     return splited_data
 
+# def mapping_time(extracted_data, splited_data):
+#     for item in splited_data:
+#         time_list = []
+#         text_list = item['text'].split()
+#         for text in text_list:
+#             for data in extracted_data:
+#                 if text in data['text']:
+#                     time_list.append(data['time_range'])
+#                     data['text'] = data['text'].replace(text, "", 1).strip()
+#                     break
+#                 continue
+#         time_list = list(set(time_list))
+#         if len(time_list) > 1:
+#             temp = []
+#             for time in time_list:
+#                 temp.append(TimeConverter.convert_timerange_to_milliseconds(time))
+#             a_min = min([range_pair[0] for range_pair in temp])
+#             b_max = max([range_pair[1] for range_pair in temp])
+#             time_list = [a_min, b_max]
+#         else:
+#             time_list = TimeConverter.convert_timerange_to_milliseconds(time_list[0])
+#         item['start'] =  TimeConverter.format_ms_to_xm_ys(time_list[0])
+#         item['end'] = TimeConverter.format_ms_to_xm_ys(time_list[1])
+#     return splited_data
+
 def mapping_time(extracted_data, splited_data):
     for item in splited_data:
-        time_list = []
+        timerange_list = []
+        abstime_list = []
         text_list = item['text'].split()
         for text in text_list:
             for data in extracted_data:
                 if text in data['text']:
-                    time_list.append(data['time_range'])
+                    timerange_list.append(data['time_range'])
+                    abstime_list.append((data['absolute_start_time'], data['absolute_end_time']))
                     data['text'] = data['text'].replace(text, "", 1).strip()
                     break
                 continue
-        time_list = list(set(time_list))
+        time_list = list(set(timerange_list))
+        abstime_list = list(set(abstime_list))
         if len(time_list) > 1:
             temp = []
-            for time in time_list:
+            for time in timerange_list:
                 temp.append(TimeConverter.convert_timerange_to_milliseconds(time))
             a_min = min([range_pair[0] for range_pair in temp])
             b_max = max([range_pair[1] for range_pair in temp])
-            time_list = [a_min, b_max]
+            time = "{} ~ {}".format(a_min,b_max)
         else:
-            time_list = TimeConverter.convert_timerange_to_milliseconds(time_list[0])
-        item['start'] =  TimeConverter.format_ms_to_xm_ys(time_list[0])
-        item['end'] = TimeConverter.format_ms_to_xm_ys(time_list[1])
+            time = time_list[0]
+        item['time'] = time
+        item['start'] = abstime_list[0][0]
+        item['end'] = abstime_list[0][1]
     return splited_data
 
 def split_with_overlap(data, chunk_size, overlap):
@@ -146,10 +175,13 @@ def get_question_context(data, target_indices, range_size=5):
     except:
         print(idx)
 
-def get_question_context_v2(data, target_indices, range_size=5):
+def get_question_context_v2(data, target_indices, speaker, range_size):
     grouped_result = []
     for idx in target_indices:
-        question = data[idx]['teacher_text']
+        if speaker == 'teacher':
+            question = data[idx]['teacher_text']
+        if speaker == 'student':
+            question = data[idx]['student_text']
         start_idx = max(0, idx - range_size)
         end_idx = min(len(data), idx + range_size + 1)
         contexts = data[start_idx:end_idx]
