@@ -3,6 +3,7 @@ import re
 import kss
 import json
 import boto3
+import uuid
 from .time_converter import TimeConverter
 
 def get_items(bucket, folder):
@@ -17,23 +18,30 @@ def get_items(bucket, folder):
 
 def download_items(bucket, file_keys, local_dir):
     s3 = boto3.client('s3')
+    local_folder_path = os.path.join(local_dir, str(uuid.uuid4()))
     
-    if not os.path.exists(local_dir):
-        os.makedirs(local_dir)
+    if not os.path.exists(local_folder_path):
+        os.makedirs(local_folder_path)
     
     for file_key in file_keys:
         folder_name = os.path.basename(os.path.dirname(file_key))
         file_name = os.path.basename(file_key)
-        local_file_path = os.path.join(local_dir, f"{folder_name}_{file_name}")
+        local_file_path = os.path.join(local_folder_path, f"{folder_name}-{file_name}")
         s3.download_file(bucket, file_key, local_file_path)
+    return local_folder_path
         
-def merge_files(directory):
+def merge_files(directory, teacher_id=None, student_id=None):
     merged_data = []
     
     for file_name in os.listdir(directory):
-        parts = file_name.split('_')
-        absolute_start_time = int(parts[-2])
-        speaker = 'teacher' if 'T' in parts[0] else 'student'
+        parts = file_name.split('-')
+        absolute_start_time = int(parts[1].split('_')[0])
+        if parts[0] == teacher_id or "T" in parts[0]:
+              speaker = "teacher"
+        elif parts[0] == student_id or "S" in parts[0]:
+              speaker = "student"      
+        else:
+              speaker = "None"
     
         file_path = os.path.join(directory, file_name)
         with open(file_path, 'r', encoding='utf-8') as f:
